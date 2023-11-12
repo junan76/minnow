@@ -17,7 +17,10 @@ protected:
   bool closed_ = false;
   bool error_ = false;
 
-  std::deque<char> buf_ = {};
+  std::vector<char> buf_ = {};
+  uint64_t write_pos_ = 0;
+  uint64_t read_pos_ = 0;
+
   uint64_t total_pushed_ = 0;
   uint64_t total_poped_ = 0;
 

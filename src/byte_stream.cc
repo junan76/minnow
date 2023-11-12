@@ -4,14 +4,23 @@
 
 using namespace std;
 
-ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity ) {}
+ByteStream::ByteStream( uint64_t capacity ) : capacity_( capacity )
+{
+  buf_.resize( capacity_ + 1 );
+}
 
 void Writer::push( string data )
 {
   // Your code here.
-  uint64_t n_write = min( data.size(), capacity_ - buf_.size() );
-  buf_.insert( buf_.end(), data.begin(), data.begin() + n_write );
-  total_pushed_ += n_write;
+  uint64_t nwrite = min( data.size(), available_capacity() );
+
+  for ( uint64_t i = 0; i < nwrite; i++ ) {
+    buf_[write_pos_] = data[i];
+    write_pos_ += 1;
+    write_pos_ %= ( capacity_ + 1 );
+  }
+
+  total_pushed_ += nwrite;
 }
 
 void Writer::close()
@@ -35,7 +44,11 @@ bool Writer::is_closed() const
 uint64_t Writer::available_capacity() const
 {
   // Your code here.
-  return capacity_ - buf_.size();
+  if ( read_pos_ <= write_pos_ ) {
+    return capacity_ + read_pos_ - write_pos_;
+  } else {
+    return read_pos_ - write_pos_ - 1;
+  }
 }
 
 uint64_t Writer::bytes_pushed() const
@@ -47,14 +60,17 @@ uint64_t Writer::bytes_pushed() const
 string_view Reader::peek() const
 {
   // Your code here.
-  // TODO: how to use string_view, deque ???
-  return string_view(&buf_.front(), 1);
+  if ( read_pos_ <= write_pos_ ) {
+    return string_view( buf_.data() + read_pos_, write_pos_ - read_pos_ );
+  } else {
+    return string_view( buf_.data() + read_pos_, capacity_ - read_pos_ + 1 );
+  }
 }
 
 bool Reader::is_finished() const
 {
   // Your code here.
-  return closed_ and buf_.size() == 0;
+  return closed_ and bytes_buffered() == 0;
 }
 
 bool Reader::has_error() const
@@ -66,15 +82,30 @@ bool Reader::has_error() const
 void Reader::pop( uint64_t len )
 {
   // Your code here.
-  uint64_t n_read = min( len, buf_.size() );
-  buf_.erase( buf_.cbegin(), buf_.cbegin() + n_read );
-  total_poped_ += n_read;
+  uint64_t nread = min( len, bytes_buffered() );
+
+  if ( read_pos_ <= write_pos_ ) {
+    read_pos_ += nread;
+  } else {
+    if ( nread <= capacity_ - read_pos_ + 1 ) {
+      read_pos_ += nread;
+      read_pos_ %= ( capacity_ + 1 );
+    } else {
+      read_pos_ = nread - ( capacity_ - read_pos_ + 1 );
+    }
+  }
+
+  total_poped_ += nread;
 }
 
 uint64_t Reader::bytes_buffered() const
 {
   // Your code here.
-  return buf_.size();
+  if ( read_pos_ <= write_pos_ ) {
+    return write_pos_ - read_pos_;
+  } else {
+    return capacity_ + write_pos_ + 1 - read_pos_;
+  }
 }
 
 uint64_t Reader::bytes_popped() const

@@ -1,7 +1,8 @@
 Checkpoint 0 Writeup
 ====================
 
-TODOs:
-- I should take some time to learn about modern C++, include the followings:
-    - STL
-    - Nen language features
+总结:
+
+- 关于peek方法
+    - 如果有数据, 不能返回空. 具体返回多少字节的数据, 取决于你的实现.
+    - 如果没有数据, 只能返回空.
