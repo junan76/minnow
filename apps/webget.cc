@@ -29,6 +29,10 @@ void get_URL( const string& host, const string& path )
     sock.read( buffer );
     cout << buffer;
   }
+
+  // Close socket
+  sock.shutdown(SHUT_RDWR);
+  sock.close();
 }
 
 int main( int argc, char* argv[] )
