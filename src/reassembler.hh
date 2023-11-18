@@ -2,6 +2,7 @@
 
 #include "byte_stream.hh"
 
+#include <map>
 #include <string>
 
 class Reassembler
@@ -31,4 +32,7 @@ public:
 
   // How many bytes are stored in the Reassembler itself?
   uint64_t bytes_pending() const;
+
+private:
+  std::map<uint64_t, std::pair<std::string, bool>> internal_map_ = {};
 };
