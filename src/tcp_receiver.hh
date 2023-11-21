@@ -15,4 +15,9 @@ public:
 
   /* The TCPReceiver sends TCPReceiverMessages back to the TCPSender. */
   TCPReceiverMessage send( const Writer& inbound_stream ) const;
+
+private:
+  Wrap32 initial_seq_ { 0 };
+  Wrap32 ack_seq_ { 0 };
+  bool syn_received_ { false };
 };
